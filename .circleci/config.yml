@@ -769,6 +769,12 @@ jobs:
     executor: docker-amd64
     steps:
       - prepare-workspace
+      - install-go:
+          go_os: linux
+          go_target_os: linux
+          go_arch: amd64
+          base_url: << pipeline.parameters.go_download_base_url >>
+          extraction_path: '.'
       - run:
           name: Linting project
           command: |
@@ -796,6 +802,12 @@ jobs:
       - run:
           name: Running TS unit tests
           command: npm run test:unit
+      - install-go:
+          go_os: linux
+          go_target_os: linux
+          go_arch: amd64
+          base_url: << pipeline.parameters.go_download_base_url >>
+          extraction_path: '.'
       - run:
           name: Running Go unit tests
           working_directory: ./cliv2
