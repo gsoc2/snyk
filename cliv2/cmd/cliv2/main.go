@@ -1,8 +1,6 @@
 package main
 
 // !!! This import needs to be the first import, please do not change this !!!
-import _ "github.com/snyk/go-application-framework/pkg/networking/fips_enable"
-
 import (
 	"encoding/json"
 	"fmt"
@@ -21,21 +19,22 @@ import (
 	"github.com/snyk/go-application-framework/pkg/app"
 	"github.com/snyk/go-application-framework/pkg/auth"
 	"github.com/snyk/go-application-framework/pkg/configuration"
+	_ "github.com/snyk/go-application-framework/pkg/networking/fips_enable"
+
 	localworkflows "github.com/snyk/go-application-framework/pkg/local_workflows"
 	"github.com/snyk/go-application-framework/pkg/networking"
 	"github.com/snyk/go-application-framework/pkg/utils"
 	"github.com/snyk/go-application-framework/pkg/workflow"
 	"github.com/snyk/go-httpauth/pkg/httpauth"
 	"github.com/snyk/snyk-iac-capture/pkg/capture"
-	snykls "github.com/snyk/snyk-ls/ls_extension"
-	"github.com/spf13/cobra"
-	"github.com/spf13/pflag"
-
-	"github.com/snyk/go-application-framework/pkg/runtimeinfo"
 
 	"github.com/snyk/cli/cliv2/internal/cliv2"
 	"github.com/snyk/cli/cliv2/internal/constants"
 	"github.com/snyk/cli/cliv2/pkg/basic_workflows"
+	"github.com/snyk/go-application-framework/pkg/runtimeinfo"
+	snykls "github.com/snyk/snyk-ls/ls_extension"
+	"github.com/spf13/cobra"
+	"github.com/spf13/pflag"
 )
 
 var internalOS string
@@ -444,6 +443,8 @@ func MainWithErrorCode() int {
 		defer sendAnalytics(cliAnalytics, debugLogger)
 	}
 
+	setTimeout(globalConfiguration)
+
 	// run the extensible cli
 	err = rootCommand.Execute()
 
@@ -466,4 +467,17 @@ func MainWithErrorCode() int {
 	debugLogger.Printf("Exiting with %d", exitCode)
 
 	return exitCode
+}
+
+func setTimeout(config configuration.Configuration) {
+	timeout := config.GetInt(configuration.TIMEOUT)
+	if timeout == 0 {
+		return
+	}
+	debugLogger.Printf("Command timeout set for %d seconds", timeout)
+	go func() {
+		<-time.After(time.Duration(timeout) * time.Second)
+		fmt.Fprintln(os.Stderr, "command timed out")
+		os.Exit(constants.SNYK_EXIT_CODE_EX_UNAVAILABLE)
+	}()
 }

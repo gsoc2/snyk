@@ -1,6 +1,8 @@
 module github.com/snyk/cli/cliv2
 
-go 1.18
+go 1.21
+
+toolchain go1.21.2
 
 require (
 	github.com/elazarl/goproxy v0.0.0-20231031074852-3ec07828be7a
@@ -173,3 +175,6 @@ require (
 
 // version 2491eb6c1c75 contains a valid license
 replace github.com/mattn/go-localereader v0.0.1 => github.com/mattn/go-localereader v0.0.2-0.20220822084749-2491eb6c1c75
+
+// TODO(cmars): remove after https://github.com/snyk/go-application-framework/pull/112 lands, update commit above
+replace github.com/snyk/go-application-framework v0.0.0-20231117172046-78850b04ac34 => github.com/cmars/go-application-framework v0.0.0-20231121235901-2a517c3dca80
